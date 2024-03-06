@@ -17,7 +17,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 
+# from rest_framework.authtoken import views #This is used for session Authentication using Token
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView, TokenRefreshView
+)
+
 urlpatterns = [
     path('', include('home.urls')),
+    path('accounts/', include('accounts.urls')),
+    
+    # path('api-token-auth/', views.obtain_auth_token), #this is used for Session Authentication Using Token
+    path('api/token/',TokenObtainPairView.as_view()),
+    path('api/token/refresh/',TokenRefreshView.as_view()),
     path('admin/', admin.site.urls),
 ]

@@ -16,4 +16,9 @@ urlpatterns =[
     
     #APIView path for Books
     path('books/',Books.as_view()),
+    path('register-user/', RegisterUser.as_view()),
+    
+    #Generic View for StudentGeneric
+    path('gen-student/', StudentGeneric.as_view()),
+    path('gen-student-UpdateDelete/<id>/',StudentGenericUpdateDelete.as_view()),
 ]

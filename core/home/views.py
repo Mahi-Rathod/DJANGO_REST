@@ -5,17 +5,79 @@ from rest_framework import status
 from .models import *
 from .serializers import *
 from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
 #GET :- we fetch data from backend in frontend..
 #POST:- we send data from frontend to backend
 #PUT :- update data
 #DELETE:- Delete Data
 
+from rest_framework_simplejwt.tokens import RefreshToken
+
+#generic views
+from rest_framework import generics
+
+class StudentGeneric(generics.ListAPIView,generics.CreateAPIView):
+    queryset = Students.objects.all()
+    serializer_class= StudentSerializers
+
+class StudentGenericUpdateDelete(generics.UpdateAPIView, generics.DestroyAPIView):
+    queryset = Students.objects.all()
+    serializer_class= StudentSerializers
+    lookup_field = 'id'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Class API View 
+class RegisterUser(APIView):
+    def get(self, request):
+        user_obj = User.objects.all()
+        serializer = UserSerializers(user_obj, many = True)
+        return Response({'status':200, 'payload': serializer.data})
+    
+    def post(self, request):
+        serializer = UserSerializers(data = request.data)
+        
+        if serializer.is_valid():
+            serializer.save()
+            user = User.objects.get(username = serializer.data['username'])
+            
+            # token_obj, _ = Token.objects.get_or_create(user=user)
+            refresh = RefreshToken.for_user(user)
+            return Response({"status": 200, "Payload":serializer.data,'refresh':str(refresh), 'access':str(refresh.access_token), "message": "Registered Successfully.."})
+        else:
+            return Response({"status":403, "errors":serializer.errors, "message":"Something Went Wrong.."})
+
+
+
+
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class StudentApi(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    
     def get(self,request):
         Student_objects = Students.objects.all()
         serializers = StudentSerializers(Student_objects, many = True)
-
+        print(request.user)
         return  Response({'status': 200, 'payload':serializers.data})
     
     def post(self,request):
